@@ -1,10 +1,16 @@
+require("dotenv").config();
+
 const { MongoClient, ObjectId } = require("mongodb");
 const express = require("express");
 const app = express();
 
+const user = process.env.DB_USERNAME;
+const pwd = process.env.DB_PASSWORD;
+const host = process.env.DB_HOST;
+
 (async () => {
-    const url = "mongodb://localhost:27017";
-    const dbName = "ocean_bancodados_22_09_2021";
+    const url = `mongodb+srv://${user}:${pwd}@${host}/`; // "mongodb://localhost:27017/"; // db_name";
+    const dbName = process.env.DB_NAME;
 
     const client = await MongoClient.connect(url);
 
@@ -79,6 +85,8 @@ const app = express();
 
         await collection.insertOne(item);
 
+        // item.id = lista.push(item);
+
         res.status(201).send(item);
     });
 
@@ -86,13 +94,13 @@ const app = express();
     // Update
     app.put("/personagens/:id", async function (req, res) {
         /*
-        Objetivo: Atualizar uma personagem
-        Passos:
-        - Pegar o ID dessa personagem
-        - Pegar a nova informação que eu quero atualizar
-        - Atualizar essa nova informação na lista de personagens
-        - Exibir que deu certo
-        */
+    Objetivo: Atualizar uma personagem
+    Passos:
+    - Pegar o ID dessa personagem
+    - Pegar a nova informação que eu quero atualizar
+    - Atualizar essa nova informação na lista de personagens
+    - Exibir que deu certo
+    */
 
         const id = req.params.id;
 
@@ -119,12 +127,19 @@ const app = express();
             { $set: novoItem }
         );
 
-        res.send(novoItem);
+        // const index = lista.indexOf(itemEncontrado);
+
+        // novoItem.id = id;
+
+        // lista[index] = novoItem;
+
+        res.send("Personagem atualizada com sucesso!");
     });
 
     // [DELETE] /personagens/:id
     // Delete
     app.delete("/personagens/:id", async function (req, res) {
+        // const id = +req.params.id;
         const id = req.params.id;
 
         const itemEncontrado = await findById(id);
@@ -135,10 +150,15 @@ const app = express();
             return;
         }
 
-        await collection.deleteOne({ _id: new ObjectId(id) });
+        await collection.deleteOne({ _id: new ObjectId(id) }
+        );
+
+        // const index = lista.indexOf(itemEncontrado);
+
+        // lista.splice(index, 1);
 
         res.send("Personagem removida com sucesso!");
     });
-
-    app.listen(3000);
+    
+    app.listen(process.env.PORT || process.env.DB_PORT); // tenta buscar a port disponível no Heroku senão usa a porta 3000
 })();
